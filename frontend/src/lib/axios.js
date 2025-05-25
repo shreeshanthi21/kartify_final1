@@ -24,42 +24,55 @@ const processQueue = (error, token = null) => {
 	failedQueue = [];
 };
 
+// List of URLs that should not trigger token refresh
+const noRefreshUrls = [
+	'/auth/refresh-token',
+	'/auth/login',
+	'/auth/signup',
+	'/auth/logout'
+];
+
 instance.interceptors.response.use(
 	(response) => response,
 	async (error) => {
 		const originalRequest = error.config;
 
-		// Don't refresh for static resources or non-401 errors
-		if (error.response?.status !== 401 || originalRequest._retry || originalRequest.url.includes("/auth/refresh-token")) {
-			// Handle network errors gracefully
-			if (!error.response) {
-				console.error("Network error:", error.message);
-				return Promise.reject(error);
-			}
+		// Don't attempt refresh if:
+		// 1. Not a 401 error
+		// 2. Request has already been retried
+		// 3. URL is in the noRefresh list
+		// 4. No response from server (network error)
+		if (
+			error.response?.status !== 401 ||
+			originalRequest._retry ||
+			noRefreshUrls.some(url => originalRequest.url.includes(url)) ||
+			!error.response
+		) {
 			return Promise.reject(error);
 		}
 
 		originalRequest._retry = true;
 
 		if (isRefreshing) {
-			// If already refreshing, queue the request
-			return new Promise((resolve, reject) => {
-				failedQueue.push({ resolve, reject });
-			})
-				.then(() => instance(originalRequest))
-				.catch((err) => Promise.reject(err));
+			try {
+				await new Promise((resolve, reject) => {
+					failedQueue.push({ resolve, reject });
+				});
+				return instance(originalRequest);
+			} catch (err) {
+				return Promise.reject(err);
+			}
 		}
 
 		isRefreshing = true;
 
 		try {
 			await instance.post("/auth/refresh-token");
-			processQueue(null); // Retry queued requests
+			processQueue(null);
 			return instance(originalRequest);
 		} catch (refreshError) {
-			processQueue(refreshError, null);
-			console.error("Refresh token failed:", refreshError);
-			// Only redirect to login if it's an authentication error
+			processQueue(refreshError);
+			// Only redirect to login for auth errors on refresh
 			if (refreshError.response?.status === 401) {
 				window.location.href = "/login";
 			}

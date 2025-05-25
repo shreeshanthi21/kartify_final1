@@ -1,6 +1,5 @@
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
-import Cart from "../models/cart.model.js";
 
 export const createOrder = async (req, res) => {
     try {
@@ -41,18 +40,9 @@ export const createOrder = async (req, res) => {
             });
         }
 
-        // Clear user's cart
-        await Cart.findOneAndUpdate(
-            { user: userId },
-            { $set: { items: [] } }
-        );
-
         res.status(201).json(order);
     } catch (error) {
         console.error("Error in createOrder:", error);
-        if (error.code === 11000) {
-            return res.status(400).json({ error: "Order creation failed due to duplicate data" });
-        }
         res.status(500).json({ error: "Error creating order" });
     }
 };

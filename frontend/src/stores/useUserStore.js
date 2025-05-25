@@ -6,8 +6,19 @@ let refreshPromise = null;
 let lastAuthCheck = 0;
 const AUTH_CHECK_INTERVAL = 5000; // 5 seconds
 
+// Initialize user from localStorage
+const getStoredUser = () => {
+	try {
+		const storedUser = localStorage.getItem('user');
+		return storedUser ? JSON.parse(storedUser) : null;
+	} catch (error) {
+		console.error('Error reading from localStorage:', error);
+		return null;
+	}
+};
+
 export const useUserStore = create((set, get) => ({
-	user: null,
+	user: getStoredUser(),
 	loading: false,
 	checkingAuth: false,
 
@@ -18,7 +29,9 @@ export const useUserStore = create((set, get) => ({
 				throw new Error("Passwords do not match");
 			}
 			const res = await axios.post("/auth/signup", { name, email, password });
-			set({ user: res.data, loading: false });
+			const userData = res.data;
+			localStorage.setItem('user', JSON.stringify(userData));
+			set({ user: userData, loading: false });
 			toast.success("Account created successfully!");
 		} catch (error) {
 			set({ loading: false });
@@ -30,9 +43,11 @@ export const useUserStore = create((set, get) => ({
 		set({ checkingAuth: true });
 		try {
 			const response = await axios.post("/auth/login", { email, password });
-			set({ user: response.data, checkingAuth: false });
+			const userData = response.data;
+			localStorage.setItem('user', JSON.stringify(userData));
+			set({ user: userData, checkingAuth: false });
 			toast.success("Logged in successfully!");
-			return response.data;
+			return userData;
 		} catch (error) {
 			set({ checkingAuth: false });
 			throw error;
@@ -45,14 +60,18 @@ export const useUserStore = create((set, get) => ({
 		} catch (error) {
 			console.error("Logout error:", error);
 		} finally {
+			localStorage.removeItem('user');
 			set({ user: null });
 		}
 	},
 
 	checkAuth: async () => {
-		// Prevent too frequent auth checks
+		const currentState = get();
+		if (currentState.checkingAuth) return;
+
 		const now = Date.now();
-		if (now - lastAuthCheck < AUTH_CHECK_INTERVAL) {
+		// Only prevent checks if we have a user and checked recently
+		if (currentState.user && now - lastAuthCheck < AUTH_CHECK_INTERVAL) {
 			return;
 		}
 		lastAuthCheck = now;
@@ -60,15 +79,15 @@ export const useUserStore = create((set, get) => ({
 		set({ checkingAuth: true });
 		try {
 			const response = await axios.get("/auth/profile");
-			set({ user: response.data, checkingAuth: false });
+			const userData = response.data;
+			localStorage.setItem('user', JSON.stringify(userData));
+			set({ user: userData, checkingAuth: false });
 		} catch (error) {
-			console.error("Auth check error:", error);
-			// Only clear user if it's an authentication error
 			if (error.response?.status === 401) {
-				set({ checkingAuth: false, user: null });
-			} else {
-				set({ checkingAuth: false });
+				localStorage.removeItem('user');
+				set({ user: null });
 			}
+			set({ checkingAuth: false });
 		}
 	},
 
@@ -76,7 +95,6 @@ export const useUserStore = create((set, get) => ({
 		if (get().checkingAuth) return;
 		set({ checkingAuth: true });
 
-		// If a refresh is already in progress, return that promise
 		if (refreshPromise) {
 			return refreshPromise;
 		}
@@ -88,6 +106,7 @@ export const useUserStore = create((set, get) => ({
 			return response.data;
 		} catch (error) {
 			console.error("Token refresh error:", error);
+			localStorage.removeItem('user');
 			set({ user: null, checkingAuth: false });
 			throw error;
 		} finally {
@@ -95,23 +114,3 @@ export const useUserStore = create((set, get) => ({
 		}
 	}
 }));
-
-// Axios interceptor for token refresh
-axios.interceptors.response.use(
-	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-		if (error.response?.status === 401 && !originalRequest._retry) {
-			originalRequest._retry = true;
-
-			try {
-				await useUserStore.getState().refreshToken();
-				return axios(originalRequest);
-			} catch (refreshError) {
-				useUserStore.getState().logout();
-				return Promise.reject(refreshError);
-			}
-		}
-		return Promise.reject(error);
-	}
-);

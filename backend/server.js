@@ -6,9 +6,8 @@ import { connectRedis } from "./lib/redis.js";
 import authRoutes from "./routes/auth.route.js";
 import productRoutes from "./routes/product.route.js";
 import orderRoutes from "./routes/order.route.js";
-import analyticsRoutes from "./routes/analytics.route.js";
-import cartRoutes from "./routes/cart.route.js";
 import couponRoutes from "./routes/coupon.route.js";
+import scannerRoutes from "./routes/scanner.route.js";
 import dotenv from "dotenv";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -45,9 +44,8 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/cart", cartRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/scanner", scannerRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -72,8 +70,8 @@ const startServer = async () => {
 		}
 
 		// Start server
-		app.listen(PORT, () => {
-			console.log(`Server is running on port ${PORT}`);
+		app.listen(PORT, '0.0.0.0', () => {
+			console.log(`Server is running on http://localhost:${PORT}`);
 		});
 	} catch (error) {
 		console.error("Failed to start server:", error);

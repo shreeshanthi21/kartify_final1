@@ -1,12 +1,11 @@
-import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, Map } from "lucide-react";
+import { UserPlus, LogIn, LogOut, Lock, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
-import { useCartStore } from "../stores/useCartStore";
+import { useEffect } from "react";
 
 const Navbar = () => {
 	const { user, logout } = useUserStore();
 	const isAdmin = user?.role === "admin";
-	const { cart } = useCartStore();
 
 	return (
 		<header className='fixed top-0 left-0 w-full bg-gray-900 bg-opacity-90 backdrop-blur-md shadow-lg z-40 transition-all duration-300 border-b border-emerald-800'>
@@ -32,73 +31,51 @@ const Navbar = () => {
 							<Map className='inline-block mr-1' size={20} />
 							<span className='hidden sm:inline'>Map</span>
 						</Link>
-		{user && (
-  <Link
-    to={"/bill-scanner"}
-    className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
-  >
-    <span className='inline-block mr-1'>🧾</span>
-    <span className='hidden sm:inline'>Grocery Billing</span>
-  </Link>
-)}
-
-
 						{user && (
 							<Link
-								to={"/cart"}
-								className='relative group text-gray-300 hover:text-emerald-400 transition duration-300 
-							ease-in-out'
+								to={"/bill-scanner"}
+								className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
 							>
-								<ShoppingCart className='inline-block mr-1 group-hover:text-emerald-400' size={20} />
-								<span className='hidden sm:inline'>Cart</span>
-								{cart.length > 0 && (
-									<span
-										className='absolute -top-2 -left-2 bg-emerald-500 text-white rounded-full px-2 py-0.5 
-									text-xs group-hover:bg-emerald-400 transition duration-300 ease-in-out'
-									>
-										{cart.length}
-									</span>
-								)}
+								<span className='inline-block mr-1'>🧾</span>
+								<span className='hidden sm:inline'>Grocery Billing</span>
 							</Link>
 						)}
-						{isAdmin && (
-							<Link
-								className='bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md font-medium
-								 transition duration-300 ease-in-out flex items-center'
-								to={"/secret-dashboard"}
-							>
-								<Lock className='inline-block mr-1' size={18} />
-								<span className='hidden sm:inline'>Dashboard</span>
-							</Link>
-						)}
-
-						{user ? (
-							<button
-								className='bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 
-						rounded-md flex items-center transition duration-300 ease-in-out'
-								onClick={logout}
-							>
-								<LogOut size={18} />
-								<span className='hidden sm:inline ml-2'>Log Out</span>
-							</button>
-						) : (
+						{!user && (
 							<>
 								<Link
-									to={"/signup"}
-									className='bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-4 
-									rounded-md flex items-center transition duration-300 ease-in-out'
+									to='/signup'
+									className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
 								>
-									<UserPlus className='mr-2' size={18} />
-									Sign Up
+									<UserPlus className='inline-block mr-1' size={20} />
+									<span className='hidden sm:inline'>Sign Up</span>
 								</Link>
 								<Link
-									to={"/login"}
-									className='bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 
-									rounded-md flex items-center transition duration-300 ease-in-out'
+									to='/login'
+									className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
 								>
-									<LogIn className='mr-2' size={18} />
-									Login
+									<LogIn className='inline-block mr-1' size={20} />
+									<span className='hidden sm:inline'>Login</span>
 								</Link>
+							</>
+						)}
+						{user && (
+							<>
+								{isAdmin && (
+									<Link
+										to='/secret-dashboard'
+										className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
+									>
+										<Lock className='inline-block mr-1' size={20} />
+										<span className='hidden sm:inline'>Admin</span>
+									</Link>
+								)}
+								<button
+									onClick={logout}
+									className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
+								>
+									<LogOut className='inline-block mr-1' size={20} />
+									<span className='hidden sm:inline'>Logout</span>
+								</button>
 							</>
 						)}
 					</nav>
@@ -107,4 +84,5 @@ const Navbar = () => {
 		</header>
 	);
 };
+
 export default Navbar;

@@ -40,7 +40,7 @@ const CategoryPage = () => {
 					)}
 
 					{products?.map((product) => (
-						<ProductCard key={product._id} product={product} />
+						<ProductCard key={product._id} product={product} viewOnly={true} />
 					))}
 				</motion.div>
 			</div>

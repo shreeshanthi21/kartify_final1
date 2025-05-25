@@ -13,24 +13,30 @@ import { Toaster } from "react-hot-toast";
 import { useUserStore } from "./stores/useUserStore";
 import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
-import CartPage from "./pages/CartPage";
-import { useCartStore } from "./stores/useCartStore";
-import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
-import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import BillScanner from "./components/BillScanner";
 
 function App() {
 	const { user, checkAuth, checkingAuth } = useUserStore();
-	const { getCartItems } = useCartStore();
-	useEffect(() => {
-		checkAuth();
-	}, [checkAuth]);
 
 	useEffect(() => {
-		if (!user) return;
+		let mounted = true;
 
-		getCartItems();
-	}, [getCartItems, user]);
+		const checkUserAuth = async () => {
+			try {
+				if (mounted) {
+					await checkAuth();
+				}
+			} catch (error) {
+				console.error('Auth check failed:', error);
+			}
+		};
+
+		checkUserAuth();
+
+		return () => {
+			mounted = false;
+		};
+	}, []); // Empty dependency array to run only once on mount
 
 	if (checkingAuth) return <LoadingSpinner />;
 
@@ -54,13 +60,9 @@ function App() {
 						element={user?.role === "admin" ? <AdminPage /> : <Navigate to='/login' />}
 					/>
 					<Route path='/category/:category' element={<CategoryPage />} />
-					<Route path='/cart' element={user ? <CartPage /> : <Navigate to='/login' />} />
 					<Route path='/orders' element={user ? <OrdersPage /> : <Navigate to='/login' />} />
-					<Route path='/purchase-success' element={<PurchaseSuccessPage />} />
-					<Route path='/purchase-cancel' element={user ? <PurchaseCancelPage /> : <Navigate to='/login' />} />
 					<Route path='/supermarket-map' element={<SupermarketMapPage />} />
 					<Route path='/bill-scanner' element={user ? <BillScanner /> : <Navigate to='/login' />} />
-
 				</Routes>
 			</div>
 			<Toaster />

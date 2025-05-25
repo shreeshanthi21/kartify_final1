@@ -1,8 +1,7 @@
-import { BarChart, PlusCircle, ShoppingBasket, FileText, Loader } from "lucide-react";
+import { PlusCircle, ShoppingBasket, FileText, Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-import AnalyticsTab from "../components/AnalyticsTab";
 import CreateProductForm from "../components/CreateProductForm";
 import ProductsList from "../components/ProductsList";
 import CashierView from "../components/CashierView";
@@ -11,7 +10,6 @@ import { useProductStore } from "../stores/useProductStore";
 const tabs = [
 	{ id: "create", label: "Create Product", icon: PlusCircle },
 	{ id: "products", label: "Products", icon: ShoppingBasket },
-	{ id: "analytics", label: "Analytics", icon: BarChart },
 	{ id: "cashier", label: "User Bill", icon: FileText },
 ];
 
@@ -43,28 +41,36 @@ const AdminPage = () => {
 					Admin Dashboard
 				</motion.h1>
 
-				<div className="flex justify-center mb-8 flex-wrap gap-4">
+				{/* Tabs */}
+				<div className="flex flex-wrap justify-center gap-4 mb-8">
 					{tabs.map((tab) => (
-						<button
+						<motion.button
 							key={tab.id}
 							onClick={() => setActiveTab(tab.id)}
-							className={`flex items-center px-4 py-2 rounded-md transition-colors duration-200 ${
+							className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-300 ${
 								activeTab === tab.id
 									? "bg-emerald-600 text-white"
-									: "bg-gray-700 text-gray-300 hover:bg-gray-600"
+									: "bg-gray-800 text-gray-300 hover:bg-gray-700"
 							}`}
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
 						>
-							<tab.icon className="mr-2 h-5 w-5" />
+							<tab.icon className="w-5 h-5" />
 							{tab.label}
-						</button>
+						</motion.button>
 					))}
 				</div>
 
-				{/* Render Tab Content */}
-				{activeTab === "create" && <CreateProductForm />}
-				{activeTab === "products" && <ProductsList products={products} />}
-				{activeTab === "analytics" && <AnalyticsTab />}
-				{activeTab === "cashier" && <CashierView />}
+				{/* Tab Content */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+				>
+					{activeTab === "create" && <CreateProductForm />}
+					{activeTab === "products" && <ProductsList />}
+					{activeTab === "cashier" && <CashierView />}
+				</motion.div>
 			</div>
 		</div>
 	);

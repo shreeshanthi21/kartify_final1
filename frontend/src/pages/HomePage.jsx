@@ -4,13 +4,55 @@ import { useProductStore } from "../stores/useProductStore";
 import FeaturedProducts from "../components/FeaturedProducts";
 
 const categories = [
-	{ href: "/jeans", name: "Jeans", imageUrl: "/jeans.jpg" },
-	{ href: "/t-shirts", name: "T-shirts", imageUrl: "/tshirts.jpg" },
-	{ href: "/shoes", name: "Shoes", imageUrl: "/shoes.jpg" },
-	{ href: "/glasses", name: "Glasses", imageUrl: "/glasses.png" },
-	{ href: "/jackets", name: "Jackets", imageUrl: "/jackets.jpg" },
-	{ href: "/suits", name: "Suits", imageUrl: "/suits.jpg" },
-	{ href: "/bags", name: "Bags", imageUrl: "/bags.jpg" },
+	{ 
+		href: "/jeans", 
+		name: "Jeans", 
+		imageUrl: "/jeans.jpg",
+		aisle: "A1",
+		navigation: "Main Entrance → Turn right → Aisle 1 (Jeans Section)"
+	},
+	{ 
+		href: "/t-shirts", 
+		name: "T-shirts", 
+		imageUrl: "/tshirts.jpg",
+		aisle: "A2",
+		navigation: "Main Entrance → Turn right → Aisle 2 (T-shirts Section)"
+	},
+	{ 
+		href: "/shoes", 
+		name: "Shoes", 
+		imageUrl: "/shoes.jpg",
+		aisle: "B1",
+		navigation: "Main Entrance → Go straight → First left → Aisle 3 (Footwear Section)"
+	},
+	{ 
+		href: "/glasses", 
+		name: "Glasses", 
+		imageUrl: "/glasses.png",
+		aisle: "B2",
+		navigation: "Main Entrance → Go straight → Second left → Aisle 4 (Accessories Section)"
+	},
+	{ 
+		href: "/jackets", 
+		name: "Jackets", 
+		imageUrl: "/jackets.jpg",
+		aisle: "C1",
+		navigation: "Main Entrance → Turn left → First right → Aisle 5 (Outerwear Section)"
+	},
+	{ 
+		href: "/suits", 
+		name: "Suits", 
+		imageUrl: "/suits.jpg",
+		aisle: "C2",
+		navigation: "Main Entrance → Turn left → Second right → Aisle 6 (Formal Wear Section)"
+	},
+	{ 
+		href: "/bags", 
+		name: "Bags", 
+		imageUrl: "/bags.jpg",
+		aisle: "B2",
+		navigation: "Main Entrance → Go straight → Second left → Aisle 4 (Accessories Section)"
+	},
 ];
 
 const HomePage = () => {
@@ -30,7 +72,7 @@ const HomePage = () => {
 					Discover the latest trends in eco-friendly fashion
 				</p>
 
-				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
 					{categories.map((category) => (
 						<CategoryItem category={category} key={category.name} />
 					))}
